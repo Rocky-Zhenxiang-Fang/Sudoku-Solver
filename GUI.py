@@ -12,6 +12,7 @@ BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+GRAY = (128, 128, 128)
 
 
 def draw_sudoku(sc, sudo: SudokuGUI):
@@ -19,24 +20,47 @@ def draw_sudoku(sc, sudo: SudokuGUI):
     # Draw numbers
     for r in range(9):
         for c in range(9):
-            if sudo.origin[r][c] == 0:
+            if sudo.boxes[r][c].val == 0 and sudo.boxes[r][c].temp == 0:
                 continue
-            num = font.render(str(sudo.origin[r][c]), True, BLACK)
-            num_rect = num.get_rect()
-            num_rect.center = (50 + BOX_LENGTH * (c + 0.5), BOX_LENGTH * (r + 0.5) + 70)
-            sc.blit(num, num_rect)
+            elif sudo.boxes[r][c].temp == sudo.boxes[r][c].val:
+                num = font.render(str(sudo.boxes[r][c].val), True, BLACK, WHITE)
+                num_rect = num.get_rect()
+                num_rect.center = (50 + BOX_LENGTH * (c + 0.5), BOX_LENGTH * (r + 0.5) + 70)
+                sc.blit(num, num_rect)
+            else:
+                num = font.render(str(sudo.boxes[r][c].temp), True, GRAY, WHITE)
+                num_rect = num.get_rect()
+                num_rect.center = (50 + BOX_LENGTH * (c + 0.5), BOX_LENGTH * (r + 0.5) + 70)
+                sc.blit(num, num_rect)
 
 
 def draw_status(sc, sudo: SudokuGUI, c, r):
     font = pygame.font.Font(None, 40)
-    unchecked = font.render("Unchecked = " + str(sudo.boxes[r][c].unchecked), False, BLUE)
+    unchecked = font.render("     Unchecked = " + str(sudo.boxes[r][c].unchecked) + "     ", False, BLUE, WHITE)
     un_rect = unchecked.get_rect()
     un_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT - 90)
     sc.blit(unchecked, un_rect)
-    checked = font.render("Checked = " + str(sudo.boxes[r][c].checked), False, RED)
-    ch_rect = unchecked.get_rect()
-    ch_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT - 45)
-    sc.blit(checked, ch_rect)
+
+
+def record_number(sc, sudoku, c, r, event):
+    num = event.key - 256
+    # font = pygame.font.Font(None, 60)
+    # num = font.render(str(num), True, GRAY)
+    # num_rect = num.get_rect()
+    # num_rect.center = (50 + BOX_LENGTH * (c + 0.5), BOX_LENGTH * (r + 0.5) + 70)
+    sudoku.boxes[r][c].temp = event.key - 256
+    draw_sudoku(sc, sudoku)
+
+
+def update_number(sc, sudo: SudokuGUI, c, r):
+    box = sudo.boxes[r][c]
+    if box.temp != 0:
+        if box.temp in box.unchecked:
+            box.unchecked.remove(box.temp)
+            if box.temp == box.ans:
+                box.val = box.temp
+    draw_status(sc, sudo, c, r)
+    draw_sudoku(sc, sudo)
 
 
 def main(board):
@@ -80,16 +104,34 @@ def main(board):
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONUP:
-                if r and c:
-                    pygame.draw.rect(bg, BLACK, (50 + c * BOX_LENGTH, 70 + r * BOX_LENGTH, BOX_LENGTH, BOX_LENGTH), LINE_THIN)
+                if r is not None and c is not None:
+                    pygame.draw.rect(bg, BLACK, (50 + c * BOX_LENGTH, 70 + r * BOX_LENGTH, BOX_LENGTH, BOX_LENGTH),
+                                     LINE_THIN)
                 pos = pygame.mouse.get_pos()
-                c = (pos[0] - 50) // BOX_LENGTH
-                r = (pos[1] - 70) // BOX_LENGTH
-                pygame.draw.rect(bg, GREEN, (50 + c * BOX_LENGTH, 70 + r * BOX_LENGTH, BOX_LENGTH, BOX_LENGTH), LINE_THIN)
-                screen.blit(bg, (0, 0))
-                draw_status(screen, sudoku, c, r)
-                draw_sudoku(screen, sudoku)
-                pygame.display.update()
+                if 0 <= (pos[0] - 50) // BOX_LENGTH <= 8 and 0 <= (pos[1] - 70) // BOX_LENGTH <= 8:
+                    c = (pos[0] - 50) // BOX_LENGTH
+                    r = (pos[1] - 70) // BOX_LENGTH
+                    pygame.draw.rect(bg, GREEN, (50 + c * BOX_LENGTH, 70 + r * BOX_LENGTH, BOX_LENGTH, BOX_LENGTH),
+                                     LINE_THIN)
+                    screen.blit(bg, (0, 0))
+                    draw_status(screen, sudoku, c, r)
+                    draw_sudoku(screen, sudoku)
+                    pygame.display.update()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1 or event.key == pygame.K_KP1 or \
+                        event.key == pygame.K_2 or event.key == pygame.K_KP2 or \
+                        event.key == pygame.K_3 or event.key == pygame.K_KP3 or \
+                        event.key == pygame.K_4 or event.key == pygame.K_KP4 or \
+                        event.key == pygame.K_5 or event.key == pygame.K_KP5 or \
+                        event.key == pygame.K_6 or event.key == pygame.K_KP6 or \
+                        event.key == pygame.K_7 or event.key == pygame.K_KP7 or \
+                        event.key == pygame.K_8 or event.key == pygame.K_KP8 or \
+                        event.key == pygame.K_9 or event.key == pygame.K_KP9:
+                    record_number(screen, sudoku, c, r, event)
+                    pygame.display.update()
+                if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                    update_number(screen, sudoku, c, r)
+                    pygame.display.update()
 
     pygame.quit()
 

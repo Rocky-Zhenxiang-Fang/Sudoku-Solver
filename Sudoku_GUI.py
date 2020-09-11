@@ -10,6 +10,7 @@ class SudokuGUI:
             self.unchecked = {1, 2, 3, 4, 5, 6, 7, 8, 9}
             self.checked = {}
             self.val = v
+            self.temp = v
             self.ans = a
 
     def __init__(self, board: List[List[int]]):
