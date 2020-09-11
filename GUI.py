@@ -12,16 +12,15 @@ BLACK = (0, 0, 0)
 
 
 def draw_sudoku(sc, sudo: SudokuGUI):
-    font = pygame.font.Font(None, 10)
-    for r in range(1):
-        for c in range(1):
+    font = pygame.font.Font(None, 60)
+    for r in range(9):
+        for c in range(9):
             if sudo.origin[r][c] == 0:
                 continue
-            print(str(sudo.origin[r][c]))
             num = font.render(str(sudo.origin[r][c]), True, BLACK)
-            sc.blit(num, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-            # sc.blit(num, (50 + BOX_LENGTH * (r + 1) // 2 - num.get_width(),
-            #               (50 + BOX_LENGTH * (r + 1) // 2 - num.get_height())))
+            num_rect = num.get_rect()
+            num_rect.center = (50 + BOX_LENGTH * (c + 0.5), BOX_LENGTH * (r + 0.5) + 70)
+            sc.blit(num, num_rect)
 
 def main(board):
     pygame.init()
@@ -31,10 +30,6 @@ def main(board):
     # Create canvas
     bg = pygame.Surface(screen.get_size()).convert()
     bg.fill(WHITE)
-
-    # # Draw Boundary
-    # pygame.draw.line(bg, BLACK, (0, 70), (WINDOW_WIDTH, 70), LINE_THICK)
-    # pygame.draw.line(bg, BLACK, (0, WINDOW_HEIGHT - 70), (WINDOW_WIDTH, WINDOW_HEIGHT - 70), LINE_THICK)
 
     # Draw Grid
     w = 0
