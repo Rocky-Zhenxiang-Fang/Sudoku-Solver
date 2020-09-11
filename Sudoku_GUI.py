@@ -2,20 +2,36 @@ from typing import List
 from copy import deepcopy
 
 
-class Sudoku:
+class SudokuGUI:
+    class Box:
+        def __init__(self, row, col, v, a):
+            self.row = row
+            self.col = col
+            self.unchecked = {1, 2, 3, 4, 5, 6, 7, 8, 9}
+            self.checked = {}
+            self.val = v
+            self.ans = a
+
     def __init__(self, board: List[List[int]]):
-        self.board = board
+        self.answer = board
         self.origin = deepcopy(board)
         self.rowSets = [set() for _ in range(9)]
         self.colSets = [set() for _ in range(9)]
-        self.squareSets = [[set() for _ in range(3)]for _ in range(3)]
+        self.squareSets = [[set() for _ in range(3)] for _ in range(3)]
         if not self.init():
             print("This is not a valid Sudoku Question")
+        self.solve()
+        self.boxes = []
+        for r in range(9):
+            sub = []
+            for c in range(9):
+                sub.append(self.Box(r, c, self.origin[r][c], self.answer[r][c]))
+            self.boxes.append(sub)
 
     def init(self) -> bool:
-        for row in range(len(self.board)):
-            for col in range(len(self.board[0])):
-                num = self.board[row][col]
+        for row in range(len(self.answer)):
+            for col in range(len(self.answer[0])):
+                num = self.answer[row][col]
                 if num != 0:
                     if num in self.rowSets[row] or num in self.colSets[col] \
                             or num in self.squareSets[row // 3][col // 3]:
@@ -23,7 +39,7 @@ class Sudoku:
                     else:
                         self.rowSets[row].add(num)
                         self.colSets[col].add(num)
-                        self.squareSets[row//3][col//3].add(num)
+                        self.squareSets[row // 3][col // 3].add(num)
         return True
 
     def printBoard(self) -> None:
@@ -33,21 +49,21 @@ class Sudoku:
         for row in range(9):
             for col in range(9):
                 if col != 8:
-                    print(self.board[row][col], end=" ")
+                    print(self.answer[row][col], end=" ")
                 else:
-                    print(self.board[row][col])
+                    print(self.answer[row][col])
                 if col == 2 or col == 5:
                     print("|", end=" ")
             if row == 2 or row == 5:
                 print("- " * 11)
 
-    def solve(self, r = 0, c = 0) -> bool:
+    def solve(self, r=0, c=0) -> bool:
         row, col = self.findNextEmpty(r, c)
         if (row, col) == (-1, -1):  # Base Case, all block filled, return True
             return True
         for i in range(1, 10):
             if self.valid(row, col, i):
-                self.board[row][col] = i
+                self.answer[row][col] = i
                 self.rowSets[row].add(i)
                 self.colSets[col].add(i)
                 self.squareSets[row // 3][col // 3].add(i)
@@ -56,9 +72,9 @@ class Sudoku:
                 self.rowSets[row].remove(i)
                 self.colSets[col].remove(i)
                 self.squareSets[row // 3][col // 3].remove(i)
-        self.board[row][col] = 0
+        self.answer[row][col] = 0
 
-        return False # Unable to solve the Sudoku
+        return False  # Unable to solve the Sudoku
 
     def findNextEmpty(self, r: int, c: int) -> (int, int):
         """
@@ -67,11 +83,11 @@ class Sudoku:
         :return (int, int): (row ,col) of the next empty box
         """
         for col in range(c + 1, 9):
-            if self.board[r][col] == 0:
+            if self.answer[r][col] == 0:
                 return r, col
         for row in range(r + 1, 9):
             for col in range(9):
-                if self.board[row][col] == 0:
+                if self.answer[row][col] == 0:
                     return row, col
         return -1, -1
 
@@ -94,8 +110,8 @@ if __name__ == '__main__':
         [0, 4, 9, 2, 0, 6, 0, 0, 7]
     ]
 
-    su = Sudoku(board)
+    su = SudokuGUI(board)
     su.printBoard()
-    su.solve()
     print(" ")
     su.printBoard()
+    print("")
