@@ -10,10 +10,18 @@ WINDOW_HEIGHT = WINDOW_WIDTH + 140
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-def draw_sudoku(backgound: pygame.Surface, sudo: SudokuGUI):
-    for r in range(9):
-        for c in range(9):
-            
+
+def draw_sudoku(sc, sudo: SudokuGUI):
+    font = pygame.font.Font(None, 10)
+    for r in range(1):
+        for c in range(1):
+            if sudo.origin[r][c] == 0:
+                continue
+            print(str(sudo.origin[r][c]))
+            num = font.render(str(sudo.origin[r][c]), True, BLACK)
+            sc.blit(num, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+            # sc.blit(num, (50 + BOX_LENGTH * (r + 1) // 2 - num.get_width(),
+            #               (50 + BOX_LENGTH * (r + 1) // 2 - num.get_height())))
 
 def main(board):
     pygame.init()
@@ -48,11 +56,14 @@ def main(board):
             pygame.draw.line(bg, BLACK, (47.5, h * BOX_LENGTH + 70), (WINDOW_WIDTH - 46, h * BOX_LENGTH + 70),
                              LINE_THIN)
         h += 1
+    screen.blit(bg, (0, 0))
 
     sudoku = SudokuGUI(board)
 
+    draw_sudoku(screen, sudoku)
 
-    screen.blit(bg, (0, 0))
+
+
     pygame.display.update()
 
     running = True

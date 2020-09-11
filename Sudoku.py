@@ -8,7 +8,7 @@ class Sudoku:
         self.origin = deepcopy(board)
         self.rowSets = [set() for _ in range(9)]
         self.colSets = [set() for _ in range(9)]
-        self.squareSets = [[set() for _ in range(3)]for _ in range(3)]
+        self.squareSets = [[set() for _ in range(3)] for _ in range(3)]
         if not self.init():
             print("This is not a valid Sudoku Question")
 
@@ -23,7 +23,7 @@ class Sudoku:
                     else:
                         self.rowSets[row].add(num)
                         self.colSets[col].add(num)
-                        self.squareSets[row//3][col//3].add(num)
+                        self.squareSets[row // 3][col // 3].add(num)
         return True
 
     def printBoard(self) -> None:
@@ -41,7 +41,7 @@ class Sudoku:
             if row == 2 or row == 5:
                 print("- " * 11)
 
-    def solve(self, r = 0, c = 0) -> bool:
+    def solve(self, r=0, c=0) -> bool:
         row, col = self.findNextEmpty(r, c)
         if (row, col) == (-1, -1):  # Base Case, all block filled, return True
             return True
@@ -58,7 +58,7 @@ class Sudoku:
                 self.squareSets[row // 3][col // 3].remove(i)
         self.board[row][col] = 0
 
-        return False # Unable to solve the Sudoku
+        return False  # Unable to solve the Sudoku
 
     def findNextEmpty(self, r: int, c: int) -> (int, int):
         """
