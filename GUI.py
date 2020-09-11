@@ -1,5 +1,5 @@
 import pygame
-from Sudoku import Sudoku
+from Sudoku_GUI import SudokuGUI
 import sys
 
 BOX_LENGTH = 70
@@ -9,6 +9,11 @@ WINDOW_WIDTH = BOX_LENGTH * 9 + 100
 WINDOW_HEIGHT = WINDOW_WIDTH + 140
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+
+def draw_sudoku(backgound: pygame.Surface, sudo: SudokuGUI):
+    for r in range(9):
+        for c in range(9):
+            
 
 def main(board):
     pygame.init()
@@ -44,7 +49,7 @@ def main(board):
                              LINE_THIN)
         h += 1
 
-    sudoku = Sudoku(board)
+    sudoku = SudokuGUI(board)
 
 
     screen.blit(bg, (0, 0))
