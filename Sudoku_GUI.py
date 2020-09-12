@@ -28,11 +28,15 @@ class SudokuGUI:
             for c in range(9):
                 sub.append(self.Box(r, c, self.origin[r][c], self.answer[r][c]))
             self.boxes.append(sub)
+        self.rowSets = [set() for _ in range(9)]
+        self.colSets = [set() for _ in range(9)]
+        self.squareSets = [[set() for _ in range(3)] for _ in range(3)]
+        self.init()
 
     def init(self) -> bool:
-        for row in range(len(self.answer)):
-            for col in range(len(self.answer[0])):
-                num = self.answer[row][col]
+        for row in range(len(self.origin)):
+            for col in range(len(self.origin[0])):
+                num = self.origin[row][col]
                 if num != 0:
                     if num in self.rowSets[row] or num in self.colSets[col] \
                             or num in self.squareSets[row // 3][col // 3]:
@@ -43,16 +47,17 @@ class SudokuGUI:
                         self.squareSets[row // 3][col // 3].add(num)
         return True
 
-    def printBoard(self) -> None:
+    def printBoard(self, ooo=False) -> None:
         """
         prints self.answer in a pretty way
         """
+        b = self.origin if ooo else self.answer
         for row in range(9):
             for col in range(9):
                 if col != 8:
-                    print(self.answer[row][col], end=" ")
+                    print(b[row][col], end=" ")
                 else:
-                    print(self.answer[row][col])
+                    print(b[row][col])
                 if col == 2 or col == 5:
                     print("|", end=" ")
             if row == 2 or row == 5:

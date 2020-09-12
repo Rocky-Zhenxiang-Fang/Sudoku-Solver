@@ -1,6 +1,6 @@
 import pygame
 from Sudoku_GUI import SudokuGUI
-import sys
+from copy import deepcopy
 
 BOX_LENGTH: int = 70
 LINE_THIN = 5
@@ -22,16 +22,13 @@ def draw_sudoku(sc, sudo: SudokuGUI):
         for c in range(9):
             if sudo.boxes[r][c].val == 0 and sudo.boxes[r][c].temp == 0:
                 continue
-            elif sudo.boxes[r][c].temp == sudo.boxes[r][c].val:
+            elif sudo.boxes[r][c].temp == sudo.boxes[r][c].val or sudo.boxes[r][c].temp == 0:
                 num = font.render(str(sudo.boxes[r][c].val), True, BLACK, WHITE)
-                num_rect = num.get_rect()
-                num_rect.center = (50 + BOX_LENGTH * (c + 0.5), BOX_LENGTH * (r + 0.5) + 70)
-                sc.blit(num, num_rect)
             else:
                 num = font.render(str(sudo.boxes[r][c].temp), True, GRAY, WHITE)
-                num_rect = num.get_rect()
-                num_rect.center = (50 + BOX_LENGTH * (c + 0.5), BOX_LENGTH * (r + 0.5) + 70)
-                sc.blit(num, num_rect)
+            num_rect = num.get_rect()
+            num_rect.center = (50 + BOX_LENGTH * (c + 0.5), BOX_LENGTH * (r + 0.5) + 70)
+            sc.blit(num, num_rect)
 
 
 def draw_status(sc, sudo: SudokuGUI, c, r):
@@ -43,12 +40,8 @@ def draw_status(sc, sudo: SudokuGUI, c, r):
 
 
 def record_number(sc, sudoku, c, r, event):
-    num = event.key - 256
-    # font = pygame.font.Font(None, 60)
-    # num = font.render(str(num), True, GRAY)
-    # num_rect = num.get_rect()
-    # num_rect.center = (50 + BOX_LENGTH * (c + 0.5), BOX_LENGTH * (r + 0.5) + 70)
-    sudoku.boxes[r][c].temp = event.key - 256
+    num = int(event.unicode)
+    sudoku.boxes[r][c].temp = num
     draw_sudoku(sc, sudoku)
 
 
@@ -59,8 +52,32 @@ def update_number(sc, sudo: SudokuGUI, c, r):
             box.unchecked.remove(box.temp)
             if box.temp == box.ans:
                 box.val = box.temp
+                sudo.origin[r][c] = box.temp
     draw_status(sc, sudo, c, r)
     draw_sudoku(sc, sudo)
+
+
+def solve_board(sc, sudo: SudokuGUI, c, r):
+    row, col = sudo.findNextEmpty(r, c)
+    if (row, col) == (-1, -1):  # Base Case, all block filled, return True
+        return True
+    for i in range(1, 10):
+        if sudo.valid(row, col, i):
+            sudo.origin[row][col] = i
+            sudo.boxes[row][col].val = i
+            draw_sudoku(sc, sudo)
+            pygame.display.update()
+            sudo.rowSets[row].add(i)
+            sudo.colSets[col].add(i)
+            sudo.squareSets[row // 3][col // 3].add(i)
+            if solve_board(sc, sudo, col, row):
+                return True
+            sudo.rowSets[row].remove(i)
+            sudo.colSets[col].remove(i)
+            sudo.squareSets[row // 3][col // 3].remove(i)
+    sudo.origin[row][col] = 0
+    sudo.boxes[row][col].val = 0
+    return False  # Unable to solve the Sudoku
 
 
 def main(board):
@@ -132,6 +149,12 @@ def main(board):
                 if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                     update_number(screen, sudoku, c, r)
                     pygame.display.update()
+                if event.key == pygame.K_SPACE:
+                    sudoku.answer = deepcopy(sudoku.origin)
+                    sudoku.printBoard(True)
+                    print(solve_board(screen, sudoku, 0, 0))
+                    print("")
+                    sudoku.printBoard(True)
 
     pygame.quit()
 
